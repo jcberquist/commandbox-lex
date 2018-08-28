@@ -1,0 +1,18 @@
+{
+    "name":"CommandBox Lucee Server Extension Installer",
+    "version":"0.1.0",
+    "author":"John Berquist",
+    "location":"jcberquist/commandbox-lex#v0.1.0",
+    "homepage":"https://github.com/jcberquist/commandbox-lex",
+    "slug":"commandbox-lex",
+    "shortDescription":"A CommandBox module for listing and installing Lucee server extensions.",
+    "type":"commandbox-modules",
+    "keywords":"lucee,commandbox,extensions",
+    "projectURL":"https://github.com/jcberquist/commandbox-lex",
+    "license":[
+        {
+            "type":"MIT",
+            "URL":"https://github.com/jcberquist/commandbox-lex/blob/master/LICENSE"
+        }
+    ]
+}
