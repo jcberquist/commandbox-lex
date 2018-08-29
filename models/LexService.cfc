@@ -53,7 +53,7 @@ component accessors="true" {
                 };
                 if ( providerExtensions.keyExists( extension.id ) ) {
                     var lv = latestVersion( providerExtensions[ extension.id ].versions, provider, prerelease );
-                    if ( versionSort( extension.version, lv.version ) == 1 ) {
+                    if ( !lv.isEmpty() && versionSort( extension.version, lv.version ) == 1 ) {
                         extensions[ extension.id ].updateVersion = lv;
                     }
                 }
