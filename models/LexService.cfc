@@ -109,13 +109,16 @@ component accessors="true" {
         return providerExtensions;
     }
 
-    function getProviderExtensionList( string provider = '', boolean prerelease = false ) {
+    function getProviderExtensionList( string filter = '', string provider = '', boolean prerelease = false ) {
         var extList = [ ];
         var extensionStruct = getProviderExtensions( provider );
         for ( var id in extensionStruct ) {
             var ext = { id: id, name: extensionStruct[ id ].name };
             ext.latestVersion = latestVersion( extensionStruct[ id ].versions, provider, prerelease );
-            if ( !ext.latestVersion.isEmpty() ) {
+            if (
+                !ext.latestVersion.isEmpty() &&
+                ( !filter.len() || ext.name.findNoCase( filter ) )
+            ) {
                 extList.append( ext );
             }
         }
