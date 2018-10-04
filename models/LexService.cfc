@@ -5,6 +5,7 @@ component accessors="true" {
     property name="fileSystemUtil" inject="FileSystem";
     property name="ProgressableDownloader" inject="ProgressableDownloader";
     property name="progressBar" inject="progressBar";
+    property name="s3Service" inject="S3Service";
     property name="serverService" inject="ServerService";
     property name="shell" inject="Shell";
     property name="tempDir" inject="tempDir@constants";
