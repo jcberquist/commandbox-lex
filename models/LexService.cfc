@@ -412,16 +412,12 @@ component accessors="true" {
         } else {
             // no version provided
             // see if we can find a stable version via a provider
-            job.addWarnLog( 'No version provided, searching for latest stable version.' )
-            var versions = ext.versions.keyArray();
-            versions.sort( versionSort );
-            for ( var version in versions ) {
-                if ( ext.versions[ version ].channel == 'stable' ) {
-                    extensionInfo.version = version;
-                    provider = ext.versions[ version ].provider;
-                    job.addSuccessLog( 'Found version #version#' )
-                    break;
-                }
+            job.addWarnLog( 'No version provided, searching for latest stable version.' );
+            var lv = latestVersion( ext.versions );
+            if ( !lv.isEmpty() ) {
+                extensionInfo.version = lv.version;
+                provider = lv.provider;
+                job.addSuccessLog( 'Found version #extensionInfo.version#' )
             }
             if ( !extensionInfo.version.len() ) {
                 // no available stable version
