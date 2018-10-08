@@ -267,9 +267,9 @@ component accessors="true" {
         // if path was relative, make it relative to server.json for tracking, if possible
         if ( !pathIsAbsolute ) {
             extensionInfo.location = makeRelativePath( extensionPath, serverDetails.serverInfo.serverConfigFile );
-            job.addLog(extensionPath);
-            job.addLog(serverDetails.serverInfo.serverConfigFile);
-            job.addLog(extensionInfo.location);
+            job.addLog( extensionPath );
+            job.addLog( serverDetails.serverInfo.serverConfigFile );
+            job.addLog( extensionInfo.location );
         }
 
         // load metadata
@@ -278,6 +278,7 @@ component accessors="true" {
         job.addLog( 'Deploying: #extensionName( extensionInfo )#' );
         var deployDir = serverDetails.serverInfo.serverHome & serverDetails.serverInfo.serverConfigDir & '/lucee-server/deploy/';
         job.addLog( deployDir );
+        directoryCreate( deployDir, true, true );
         fileCopy( extensionPath, deployDir & getFileFromPath( extensionPath ) );
 
         job.complete();
