@@ -10,7 +10,7 @@ component accessors="true" {
     property name="shell" inject="Shell";
     property name="tempDir" inject="tempDir@constants";
     property name='job' inject='InteractiveJob';
-    property name='JSONPrettyPrint' inject='JSONPrettyPrint';
+    property name='JSONService' inject='JSONService';
 
     property name="providers" type="array";
     property name="providerExtensions" type="struct";
@@ -460,7 +460,7 @@ component accessors="true" {
         extList.sort( ( a, b ) => compare( a.name.lcase(), b.name.lcase() ) );
 
         serverDetails.serverJSON.luceeServerExtensions = extList;
-        fileWrite( serverDetails.serverInfo.serverConfigFile, JSONPrettyPrint.formatJSON( serverDetails.serverJSON ) );
+        JSONService.writeJSONFile( serverDetails.serverInfo.serverConfigFile, serverDetails.serverJSON );
     }
 
     private function getExtensionMetadata( string extensionPath ) {
