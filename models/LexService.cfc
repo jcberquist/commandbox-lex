@@ -30,7 +30,7 @@ component accessors="true" {
     }
 
     function isLuceeServer( struct serverInfo ) {
-        if ( serverInfo.engineName != 'lucee' ) return false;
+        if ( !serverInfo.engineName.startsWith( 'lucee' ) ) return false;
         if ( serverInfo.engineVersion.left( 1 ) != '5' ) return false;
         var configFile = serverInfo.serverHome & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
         return fileExists( configFile );
