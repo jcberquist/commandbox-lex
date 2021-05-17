@@ -85,7 +85,7 @@ component accessors="true" {
             providerExtensions = { };
             for ( var providerData in providers ) {
                 for ( var source in providerData.info ) {
-                    var req = makeHTTPRequest( source & '/rest/extension/provider/info' );
+                    var req = makeHTTPRequest( source & '/rest/extension/provider/info?type=all' );
                     var resData = deserializeJSON( req.filecontent );
                     resData.extensions.data.each( ( row ) => {
                         var extension = row.reduce( ( ext, column, i ) => {
