@@ -32,13 +32,13 @@ component accessors="true" {
     function isLuceeServer( struct serverInfo ) {
         if ( !serverInfo.engineName.startsWith( 'lucee' ) ) return false;
         if ( serverInfo.engineVersion.left( 1 ) != '5' ) return false;
-        var configFile = serverInfo.serverHome & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
+        var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
         return fileExists( configFile );
     }
 
     function getServerExtensions( struct serverInfo, string provider = '', boolean prerelease = false ) {
         var providerExtensions = getProviderExtensions();
-        var configFile = serverInfo.serverHome & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
+        var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
         var serverConfig = xmlParse( fileRead( configFile ) );
         var extensionsSource = xmlSearch( serverConfig, '/cfLuceeConfiguration/extensions' );
         var extensions = { };
@@ -176,7 +176,7 @@ component accessors="true" {
         }
 
         var startTick = getTickCount();
-        var deployDir = serverDetails.serverInfo.serverHome & serverDetails.serverInfo.serverConfigDir & '/lucee-server/deploy/';
+        var deployDir = serverDetails.serverInfo.serverHomeDirectory & serverDetails.serverInfo.serverConfigDir & '/lucee-server/deploy/';
         var extensionsToDeploy = directoryList( deployDir, false, 'path' );
         var extensionsToWaitFor = extensions
             .map( ( ext ) => {
@@ -276,7 +276,7 @@ component accessors="true" {
         extensionInfo.append( getExtensionMetadata( extensionPath ) );
 
         job.addLog( 'Deploying: #extensionName( extensionInfo )#' );
-        var deployDir = serverDetails.serverInfo.serverHome & serverDetails.serverInfo.serverConfigDir & '/lucee-server/deploy/';
+        var deployDir = serverDetails.serverInfo.serverHomeDirectory & serverDetails.serverInfo.serverConfigDir & '/lucee-server/deploy/';
         job.addLog( deployDir );
         directoryCreate( deployDir, true, true );
         fileCopy( extensionPath, deployDir & getFileFromPath( extensionPath ) );
