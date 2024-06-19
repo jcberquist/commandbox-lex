@@ -1,8 +1,8 @@
 {
     "name":"CommandBox Lucee Server Extension Installer",
-    "version":"0.3.0",
+    "version":"0.4.0",
     "author":"John Berquist",
-    "location":"jcberquist/commandbox-lex#v0.3.0",
+    "location":"jcberquist/commandbox-lex#v0.4.0",
     "homepage":"https://github.com/jcberquist/commandbox-lex",
     "slug":"commandbox-lex",
     "shortDescription":"A CommandBox module for listing and installing Lucee server extensions.",
