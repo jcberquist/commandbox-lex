@@ -23,8 +23,8 @@ component accessors="true" {
                 info: [ 'https://www.forgebox.io' ] },
             {
                 name: 'Lucee',
-                download: 'https://cdn.lucee.org',
-                info: [ 'https://cdn.lucee.org' ]
+                download: 'https://extension.lucee.org',
+                info: [ 'https://extension.lucee.org' ]
             }
         ] );
     }
