@@ -32,7 +32,7 @@ component {
         var serverDetails = serverService.resolveServerDetails( arguments );
 
         if ( !lexService.isLuceeServer( serverDetails.serverInfo ) ) {
-            print.redLine( 'Cannot find a valid Lucee 5 server.' );
+            print.redLine( 'Cannot find a valid Lucee server.' );
             return;
         }
 

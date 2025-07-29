@@ -9,8 +9,8 @@ component accessors="true" {
     property name="serverService" inject="ServerService";
     property name="shell" inject="Shell";
     property name="tempDir" inject="tempDir@constants";
-    property name='job' inject='InteractiveJob';
-    property name='JSONService' inject='JSONService';
+    property name="job" inject="InteractiveJob";
+    property name="JSONService" inject="JSONService";
 
     property name="providers" type="array";
     property name="providerExtensions" type="struct";
@@ -31,35 +31,62 @@ component accessors="true" {
 
     function isLuceeServer( struct serverInfo ) {
         if ( !serverInfo.engineName.startsWith( 'lucee' ) ) return false;
-        if ( serverInfo.engineVersion.left( 1 ) != '5' ) return false;
-        var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
+        var serverMajorVersion = serverInfo.engineVersion.left( 1 );
+        if ( !listFind( '5,6', serverMajorVersion ) ) return false;
+        if ( serverMajorVersion == '5' ) {
+            var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
+        } else {
+            var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/.CFConfig.json';
+        }
         return fileExists( configFile );
     }
 
     function getServerExtensions( struct serverInfo, string provider = '', boolean prerelease = false ) {
         var providerExtensions = getProviderExtensions();
-        var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
-        var serverConfig = xmlParse( fileRead( configFile ) );
-        var extensionsSource = xmlSearch( serverConfig, '/cfLuceeConfiguration/extensions' );
-        var extensions = { };
-        if ( extensionsSource.len() ) {
-            for ( var extensionXML in extensionsSource[ 1 ].XMLChildren ) {
-                var extension = { };
-                extension.append( extensionXML.XMLAttributes );
-                extensions[ extension.id ] = {
-                    name: extension.name,
-                    version: extension.version,
-                    filename: extension[ 'file-name' ],
-                    updateVersion: { }
-                };
-                if ( providerExtensions.keyExists( extension.id ) ) {
-                    var lv = latestVersion( providerExtensions[ extension.id ].versions, provider, prerelease );
-                    if ( !lv.isEmpty() && versionSort( extension.version, lv.version ) == 1 ) {
-                        extensions[ extension.id ].updateVersion = lv;
+        var serverMajorVersion = serverInfo.engineVersion.left( 1 );
+        if ( serverMajorVersion == '5' ) {
+            var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/lucee-server.xml';
+            var serverConfig = xmlParse( fileRead( configFile ) );
+            var extensionsSource = xmlSearch( serverConfig, '/cfLuceeConfiguration/extensions' );
+            var extensions = { };
+            if ( extensionsSource.len() ) {
+                for ( var extensionXML in extensionsSource[ 1 ].XMLChildren ) {
+                    var extension = { };
+                    extension.append( extensionXML.XMLAttributes );
+                    extensions[ extension.id ] = {
+                        name: extension.name,
+                        version: extension.version,
+                        updateVersion: { }
+                    };
+                    if ( providerExtensions.keyExists( extension.id ) ) {
+                        var lv = latestVersion( providerExtensions[ extension.id ].versions, provider, prerelease );
+                        if ( !lv.isEmpty() && versionSort( extension.version, lv.version ) == 1 ) {
+                            extensions[ extension.id ].updateVersion = lv;
+                        }
+                    }
+                }
+            }
+        } else {
+            var configFile = serverInfo.serverHomeDirectory & serverInfo.serverConfigDir & '/lucee-server/context/.CFConfig.json';
+            var serverConfig = deserializeJSON( fileRead( configFile ) );
+            var extensions = { };
+            if ( serverConfig.keyExists( 'extensions' ) ) {
+                for ( var extension in serverConfig.extensions ) {
+                    extensions[ extension.id ] = {
+                        name: extension.name,
+                        version: extension.version,
+                        updateVersion: { }
+                    };
+                    if ( providerExtensions.keyExists( extension.id ) ) {
+                        var lv = latestVersion( providerExtensions[ extension.id ].versions, provider, prerelease );
+                        if ( !lv.isEmpty() && versionSort( extension.version, lv.version ) == 1 ) {
+                            extensions[ extension.id ].updateVersion = lv;
+                        }
                     }
                 }
             }
         }
+
         return extensions;
     }
 
@@ -99,7 +126,10 @@ component accessors="true" {
                         versions.append( extension.older, true );
                         for ( var version in versions ) {
                             if ( !providerExtensions[ extension.id ].versions.keyExists( version ) ) {
-                                providerExtensions[ extension.id ].versions[ version ] = { provider: providerData.name, source: source };
+                                providerExtensions[ extension.id ].versions[ version ] = {
+                                    provider: providerData.name,
+                                    source: source
+                                };
                             }
                         }
                     } );
@@ -141,7 +171,12 @@ component accessors="true" {
 
         var installed = [ ];
         for ( var extension in extensions ) {
-            var extensionInfo = installExtension( extension, serverDetails, basePath, verbose );
+            var extensionInfo = installExtension(
+                extension,
+                serverDetails,
+                basePath,
+                verbose
+            );
             if ( !isNull( extensionInfo ) ) {
                 installed.append( extensionInfo );
             }
@@ -171,7 +206,10 @@ component accessors="true" {
         job.start( 'Waiting for extensions to deploy.' );
 
         if ( !serverService.isServerRunning( serverDetails.serverInfo ) ) {
-            job.error( 'Server is not currently running...extensions will not be picked up until it is next started.', verbose );
+            job.error(
+                'Server is not currently running...extensions will not be picked up until it is next started.',
+                verbose
+            );
             return;
         }
 
@@ -205,7 +243,7 @@ component accessors="true" {
                     );
                 } );
                 if ( !extensionsToWaitFor.len() ) {
-                    job.addLog( 'Extension(s) are present in lucee-server.xml config.' );
+                    job.addLog( 'Extension(s) are present in lucee server config.' );
                 }
             }
 
@@ -367,7 +405,10 @@ component accessors="true" {
         };
 
         // is extension a file path
-        var pathIsAbsolute = reFindNoCase( '^(\\\\|/|[a-z]:/)', fileSystemUtil.normalizeSlashes( extensionInfo.location ) );
+        var pathIsAbsolute = reFindNoCase(
+            '^(\\\\|/|[a-z]:/)',
+            fileSystemUtil.normalizeSlashes( extensionInfo.location )
+        );
         var extensionPath = fileSystemUtil.resolvePath( extensionInfo.location, basePath );
         if ( fileExists( extensionPath ) ) {
             // we can fill out the details by reading the manifest
@@ -444,13 +485,14 @@ component accessors="true" {
             serverDetails.serverJSON[ 'luceeServerExtensions' ] = [ ];
         }
 
-        var extMap = serverDetails.serverJSON.luceeServerExtensions.filter( ( ext ) => {
-            return ext.keyExists( 'id' ) && ext.id.len() && ext.keyExists( 'version' ) && ext.version.len();
-        } )
+        var extMap = serverDetails.serverJSON.luceeServerExtensions
+            .filter( ( ext ) => {
+                return ext.keyExists( 'id' ) && ext.id.len() && ext.keyExists( 'version' ) && ext.version.len();
+            } )
             .reduce( ( extMap, ext ) => {
-            extMap[ ext.id ] = ext;
-            return extMap;
-        }, { } );
+                extMap[ ext.id ] = ext;
+                return extMap;
+            }, { } );
 
         for ( var extInfo in extensions ) {
             extMap[ extInfo.id ] = extInfo;
@@ -536,7 +578,9 @@ component accessors="true" {
     function makeRelativePath( srcPath, targetPath ) {
         var count = 0;
         var srcDir = fileSystemUtil.normalizeSlashes( getDirectoryFromPath( srcPath ) ).replace( '//', '/', 'all' );
-        var targetDir = fileSystemUtil.normalizeSlashes( getDirectoryFromPath( targetPath ) ).replace( '//', '/', 'all' );
+        var targetDir = fileSystemUtil
+            .normalizeSlashes( getDirectoryFromPath( targetPath ) )
+            .replace( '//', '/', 'all' );
         while ( true ) {
             if ( !srcDir.startsWith( targetDir ) ) {
                 var pathSegment = reFindNoCase( '[^/]+/$', targetDir );
@@ -583,12 +627,13 @@ component accessors="true" {
             }
         }
 
-        cfhttp(attributeCollection = attributeCol) {
+        cfhttp( attributeCollection = attributeCol ) {
             for ( var key in headers ) {
-                cfhttpparam(type='header', name=key, value=headers[ key ]);
+                cfhttpparam( type = "header", name = key, value = headers[ key ] );
             }
         }
 
         return req;
     }
+
 }
